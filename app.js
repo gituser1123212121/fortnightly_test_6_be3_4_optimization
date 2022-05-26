@@ -13,6 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 const User = require("./models").user;
 const Message = require("./models").message;
 const Group = require("./models").group;
+const { hashSync } = require("bcryptjs");
 
 db.sequelize
   .sync({ force: true })
@@ -21,12 +22,12 @@ db.sequelize
     User.create({
       username: "user1",
       email: "user1@yahoo.com",
-      password: "12345678",
+      password: hashSync("12345678"),
     }).then((user1) => {
       User.create({
         username: "user2",
         email: "user2@yahoo.com",
-        password: "12345678",
+        password: hashSync("12345678"),
       }).then((user2) => {
         console.log(`initial users created`);
         console.log("tables dropped and recreated");
@@ -80,10 +81,10 @@ db.sequelize
   });
 
 //Routes
-app.use("/api/chat/v1/ping", require("./routes/ping"));
-app.use("/api/chat/v1/auth", require("./routes/auth"));
-app.use("/api/chat/v1/msg", require("./routes/chat"));
-app.use("/api/chat/v1/grp", require("./routes/group"));
+app.use("/api/chat/v1/ping", require("./routes/ping.route"));
+app.use("/api/chat/v1/auth", require("./routes/auth.route"));
+app.use("/api/chat/v1/msg", require("./routes/chat.route"));
+app.use("/api/chat/v1/grp", require("./routes/group.route"));
 
 const PORT = process.env.PORT || 3000;
 

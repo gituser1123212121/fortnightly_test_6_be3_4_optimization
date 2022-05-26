@@ -6,7 +6,7 @@ const registerUser = (req, res, next) => {
   const userObj = {
     username: req.body.username,
     email: req.body.email,
-    password: hashSync(req.body.password, 10),
+    password: hashSync(req.body.password),
   };
   User.findOne({ email: userObj.email })
     .then((user) => {
