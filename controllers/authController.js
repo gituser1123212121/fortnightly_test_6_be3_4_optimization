@@ -1,6 +1,7 @@
 const User = require("../models").user;
 const { hashSync, compareSync } = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { Op } = require("sequelize");
 
 const registerUser = (req, res, next) => {
   const userObj = {
@@ -8,7 +9,7 @@ const registerUser = (req, res, next) => {
     email: req.body.email,
     password: hashSync(req.body.password),
   };
-  User.findOne({ email: userObj.email })
+  User.findOne({ where: { email: { [Op.eq]: userObj.email } } })
     .then((user) => {
       if (!user) {
         User.create(userObj).then(() => {
@@ -29,24 +30,26 @@ const registerUser = (req, res, next) => {
 
 const loginUser = (req, res, next) => {
   const loginObj = { email: req.body.email, password: req.body.password };
-  User.findOne({ email: loginObj.email }).then((user) => {
-    if (user) {
-      // user exists
-      // chek for password
-      if (compareSync(loginObj.password, user.password) === true) {
-        let token = jwt.sign({ userId: user.userId }, "mysecretkey");
-        // login success
-        res.status(200).send({
-          message: `login success for ${loginObj.email}`,
-          token: token,
-        });
+  User.findOne({ where: { email: { [Op.eq]: loginObj.email } } }).then(
+    (user) => {
+      if (user) {
+        // user exists
+        // chek for password
+        if (compareSync(loginObj.password, user.password) === true) {
+          let token = jwt.sign({ userId: user.userId }, "mysecretkey");
+          // login success
+          res.status(200).send({
+            message: `login success for ${loginObj.email}`,
+            token: token,
+          });
+        }
+      } else {
+        res
+          .status(404)
+          .json({ message: `user does not exist, please register first` });
       }
-    } else {
-      res
-        .status(404)
-        .json({ message: `user does not exist, please register first` });
     }
-  });
+  );
 };
 
 const getAllUsers = async (req, res, next) => {
